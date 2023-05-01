@@ -1,0 +1,58 @@
+---
+- name: create the new instance 
+  hosts: localhost
+  gather_facts: true
+  vars:
+    count: 2
+  tasks:
+  - name: create the new instance 1
+    openstack.cloud.server:
+      state: present
+      # cloud: openstack
+      auth: 
+        auth_url: https://10.25.53.102:5000/v3
+        username: gopalai
+        password: Password@123
+        project_name: openstack
+        project_domain_name: rps-r01-opencloud-01
+        user_domain_name: rps-r01-opencloud-01  
+      name: "ashok_vm_{{ item }}"
+      # cloud: openstack
+      image: 27c10ad2-9e1b-4172-91da-b70374a098d7
+      key_name: ashok_m_kp_01
+      timeout: 200
+      flavor: small
+      network: openstack_int_subnet_01
+      validate_certs: no
+      security_groups: default  
+    loop: "{{ range(count)|list }}"
+    register: vm_result 
+
+  - name: store the data
+    set_fact: 
+      ashok_vm_{{ item.item }}: "{{ item.server.accessIPv4 }}"
+    loop: "{{ vm_result.results }}" 
+    when: item.changed
+    no_log: True
+
+  - name: Debug variables 
+    debug: 
+      var: ashok_vm_{{ item }} 
+    # loop: "{{ vm_result.results }}"   
+    loop: "{{ range(count)|list }}"
+
+  - name: create the file to store the vm_name and ip
+    file: 
+      path: /home/ubuntu/Ansible/testingjen.txt
+      state: touch 
+
+  - name: Save VM IP addresses to file
+    lineinfile:
+      path: /home/ubuntu/Ansible/testingjen.txt
+      line: |
+        {% for item in range(count)|list %}
+        ashok_vm_{{ item }}: {{ vars['ashok_vm_'+item|string] }}
+        {% endfor %}
+  
+
+  
