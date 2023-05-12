@@ -18,7 +18,7 @@
         user_domain_name: rps-r01-opencloud-01
       name: "vm_{{ item }}"
       # cloud: openstack
-      image: 27c10ad2-9e1b-4172-91da-b70374a098d7
+      image: 1a32f93b-b9a4-46e6-9540-9968113335da
       key_name: devsecopskey
       timeout: 200
       flavor: small
@@ -51,5 +51,5 @@
       path: /home/ansible/testingjen.txt
       line: |
         {% for item in range(count)|list %}
-        vm_{{ item }}: {{ vars['vm_'+item|string] }}
+        {{ vars['vm_'+item|string] }}
         {% endfor %}
